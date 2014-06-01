@@ -29,6 +29,7 @@ var clickFunction = function (e) {
     var title = escape(removeExtraStr(this.text));
 
     var port = chrome.extension.connect({name: "AtoR"});
+
     port.postMessage({title: title});
 }
 
@@ -67,7 +68,6 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
         case('get_title'):
 
             var title = msg.title;
-
             if (!title) {
                 title = document.getElementsByTagName('title')[0].text;
                 title = escape(removeExtraStr(title));
@@ -97,9 +97,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
                 for (var t = 0; t < num; t++) {
 
                     if (anchor_title[t].match(new RegExp('^' + title))) {
-                        location.href = anchors[i].href;
-                        return false;
-                    } else if (title.match(new RegExp('^' + anchor_title[t]))) {
+
                         location.href = anchors[i].href;
                         return false;
                     }
