@@ -17,11 +17,15 @@ var existsUrl = function (link) {
     if (link.replace(/(https?)\:\/\/(.*)\/$/, "$2") == location.host + location.pathname) {
         return true;
     }
+    if (link == location.href) {
 
-    // if (link.split('://')[1] == location.host) {
+        return true;
+    }
 
-    //     return true;
-    // }
+    if (link == document.referrer) {
+
+        return true;
+    }
     // if (link.split('://')[1].replace(/(.+)\//, "$1") == location.host) {
     //     return true;
     // }
@@ -93,7 +97,7 @@ var skipper = function (title) {
     for (var i = 0; i < len; i++) {
 
         // if (anchors[i].href == 'http://inazumanews2.com/archives/33925368.html') {
-            console.log(anchors[i].href);
+            // console.log(anchors[i].href);
         // }
         
 
@@ -105,18 +109,15 @@ var skipper = function (title) {
         } 
 
         var anchor_title = [];
-
         
         if (trim(anchors[i].title)) {
             var tmp = escape(trim(anchors[i].title));
-
             anchor_title.push(tmp);
         }
 
         if (trim(anchors[i].text)) {
 
             var tmp = escape(trim(anchors[i].text));
-            
             anchor_title.push(tmp);
         } 
 
@@ -128,12 +129,26 @@ var skipper = function (title) {
             } else if (title.match(new RegExp('^' + anchor_title[t]))) {
                 location.href = anchors[i].href;
                 return true;
+            } else if (isChild(anchors[i], anchor_title[t])) {
+                location.href = anchors[i].href;
+                return true;
+            } else if (isChild(anchors[i], title)) {
+                location.href = anchors[i].href;
+                return true;
             }
         }
     }
     return false;
 }
 
+var isChild = function (node, text) {
+
+    var text = node;
+    
+    console.log(text);
+
+    return false;
+}
 
 var matchSkipAutoList = function () {
 
@@ -179,6 +194,8 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
         case('get_title'):
 
             var title = msg.title;
+            console.log(unescape(title));
+
             if (!skipper(title)) {
 
                 title = document.getElementsByTagName('title')[0].text;
