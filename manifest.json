@@ -1,0 +1,25 @@
+{
+	"name": "AntennaSkipper",
+    "manifest_version": 2,
+    "version": "1.0",
+
+    "description": "",
+
+    "permissions": [
+        "tabs", "http://*/*", "https://*/*", "contextMenus", "management", "activeTab"
+    ],
+
+    "content_scripts": [{
+        "matches": ["*://*/*"],
+        "js": ["content.js"]
+    }],
+    
+    "background": {  
+      "scripts": ["background.js"]  
+    },  
+    
+    "browser_action": {
+         "default_icon": "icon19.png",
+         "default_title": "Test Memory"
+    }
+}
