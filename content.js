@@ -5,6 +5,29 @@ var trim = function(str) {
     return str.replace(/^[\s　]+|[\s　]+$/g, "");
 }
 
+var excludeHost = function (url) {
+
+    if (!url.match('://')) {
+        return '';
+    }
+    url = url.split('://')[1];
+    
+    if (!url.match('/')) {
+        return '';
+    }
+
+    var paths = url.split('/');
+
+    var len = paths.length;
+    
+    var str = '';
+    for (var i = 1; i < len; i++) {
+        str += '/' + paths[i];
+    }
+
+    return str;
+};
+
 var existsUrl = function (link) {
 
     // if (link.replace(/(https?)\:\/\/(.*)$/, "$2") == location.host + location.pathname) {
@@ -21,6 +44,10 @@ var existsUrl = function (link) {
         return true;
     }
 
+    if (excludeHost(link) == '/') {
+        return true;
+    }
+
     if (link.match(/^http/) === true && escape(link.split('://')[1]).match(new RegExp('^' + escape(location.host)))) {
         return true;
     }
@@ -31,6 +58,7 @@ var existsUrl = function (link) {
 
     return false;
 }
+
 
 // 余分な文字列を削除
 var removeExtraStr = function (str) {
