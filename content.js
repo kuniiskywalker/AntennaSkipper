@@ -7,25 +7,24 @@ var trim = function(str) {
 
 var existsUrl = function (link) {
 
-    if (!link) {
-        return false;
-    }
-
-    if (link.replace(/(https?)\:\/\/(.*)$/, "$2") == location.host + location.pathname) {
-        return true;
-    }
-    if (link.replace(/(https?)\:\/\/(.*)\/$/, "$2") == location.host + location.pathname) {
-        return true;
-    }
+    // if (link.replace(/(https?)\:\/\/(.*)$/, "$2") == location.host + location.pathname) {
+    //     return true;
+    // }
+    // if (link.replace(/(https?)\:\/\/(.*)\/$/, "$2") == location.host + location.pathname) {
+    //     return true;
+    // }
     if (link == location.href) {
-
         return true;
     }
 
     if (link == document.referrer) {
-
         return true;
     }
+
+    if (link.match(/^http/) === true && escape(link.split('://')[1]).match(new RegExp('^' + escape(location.host)))) {
+        return true;
+    }
+
     // if (link.split('://')[1].replace(/(.+)\//, "$1") == location.host) {
     //     return true;
     // }
@@ -62,7 +61,33 @@ var clickFunction = function (e) {
 
     var port = chrome.extension.connect({name: "AtoR"});
     port.postMessage({title: title});
-}
+};
+
+var matchString = function (str, match) {
+
+    if (str.match(new RegExp('^' + match))) {
+        return true;
+    } else if (match.match(new RegExp('^' + str))) {
+        return true;
+    }
+
+    return false;
+};
+
+var isChild = function (tag, text) {
+
+    for (var i = 0; i < tag.length; i++) {
+      var childs = tag[i].childNodes;
+      if (childs.length == 1) {
+
+          if (matchString(childs[0], text)) {
+              return true;
+          }
+      } else {
+         isChild(childs, text);
+      }
+    }
+};
 
 // イベント登録処理
 var atags = document.getElementsByTagName("a"),
@@ -92,14 +117,11 @@ for (var i = 0; i < frameLen; i++) {
 
 var skipper = function (title) {
 
+    // console.log('title: ' + unescape(title));
+
     var anchors = document.getElementsByTagName('a');
     var len = anchors.length;
     for (var i = 0; i < len; i++) {
-
-        // if (anchors[i].href == 'http://inazumanews2.com/archives/33925368.html') {
-            // console.log(anchors[i].href);
-        // }
-        
 
         if (!anchors[i].href) {
             continue
@@ -107,6 +129,9 @@ var skipper = function (title) {
         if (existsUrl(anchors[i].href)) {
             continue;
         } 
+        if (matchSkipAutoList(anchors[i].href)) {
+            continue;
+        }
 
         var anchor_title = [];
         
@@ -123,36 +148,27 @@ var skipper = function (title) {
 
         var num = anchor_title.length;
         for (var t = 0; t < num; t++) {
-            if (anchor_title[t].match(new RegExp('^' + title))) {
-                location.href = anchors[i].href;
-                return true;
-            } else if (title.match(new RegExp('^' + anchor_title[t]))) {
-                location.href = anchors[i].href;
-                return true;
-            } else if (isChild(anchors[i], anchor_title[t])) {
-                location.href = anchors[i].href;
+            if (matchString(anchor_title[t], title)) {
+                goReality(anchors[i].href);
                 return true;
             } else if (isChild(anchors[i], title)) {
-                location.href = anchors[i].href;
+                goReality(anchors[i].href);
                 return true;
             }
         }
     }
     return false;
-}
+};
 
-var isChild = function (node, text) {
+var goReality = function (link) {
+    location.href = link;
+    return true;
+};
 
-    var text = node;
-    
-    console.log(text);
-
-    return false;
-}
-
-var matchSkipAutoList = function () {
+var matchSkipAutoList = function (link) {
 
     var urlAry = [
+    "http://moudamepo.com", 
     "http://giko-news.com", 
     "http://newpuru.doorblog.jp", 
     "http://2ch-c.net", 
@@ -178,7 +194,7 @@ var matchSkipAutoList = function () {
 
     var len = urlAry.length;
     for (var i = 0; i < len; i++) {
-        if (location.origin == urlAry[i]) {
+        if (link == urlAry[i]) {
             return true;
         }
     }
@@ -194,8 +210,6 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
         case('get_title'):
 
             var title = msg.title;
-            console.log(unescape(title));
-
             if (!skipper(title)) {
 
                 title = document.getElementsByTagName('title')[0].text;
@@ -208,7 +222,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
 
         case('auto'):
 
-            if (!matchSkipAutoList()) {
+            if (!matchSkipAutoList(location.origin)) {
                 return false;
             }
 
