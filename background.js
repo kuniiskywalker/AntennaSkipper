@@ -39,6 +39,10 @@ chrome.extension.onConnect.addListener(function(port) {
 
 chrome.tabs.onCreated.addListener(function (tab) {
     
+    if (!localStorage['title']) {
+        return false;
+    }
+    
     var spTabId = tab.id;
     chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         if (spTabId == tabId && tab.status === 'complete') {
