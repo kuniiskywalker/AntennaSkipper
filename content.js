@@ -207,17 +207,10 @@ var skipper = function (title) {
     return false;
 };
 
-<<<<<<< HEAD
 var goReality = function (btn) {
     var evt = document.createEvent("MouseEvents");
     evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
     btn.dispatchEvent( evt );
-    // location.href = link;
-=======
-var goReality = function (link) {
-
-    location.href = link;
->>>>>>> 66042c23b7d2b8f5122dbe4524e7002fcb2fd23a
     return true;
 };
 
