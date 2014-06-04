@@ -177,10 +177,10 @@ var skipper = function (title) {
         var num = anchor_title.length;
         for (var t = 0; t < num; t++) {
             if (matchString(anchor_title[t], title)) {
-                goReality(anchors[i].href);
+                goReality(anchors[i]);
                 return true;
             } else if (isChild(anchors[i], title)) {
-                goReality(anchors[i].href);
+                goReality(anchors[i]);
                 return true;
             }
         }
@@ -188,8 +188,11 @@ var skipper = function (title) {
     return false;
 };
 
-var goReality = function (link) {
-    location.href = link;
+var goReality = function (btn) {
+    var evt = document.createEvent("MouseEvents");
+    evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    btn.dispatchEvent( evt );
+    // location.href = link;
     return true;
 };
 
