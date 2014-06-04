@@ -6,7 +6,9 @@ var goSkipper = function (tabId) {
     message.title = localStorage['title'];
 
     // 現在表示しているタブにメッセージを送る
-    chrome.tabs.sendMessage(tabId, message, function() {});
+    chrome.tabs.sendMessage(tabId, message, function() {
+        localStorage['title'] = '';
+    });
 }
 
 var autoSkipper = function (tabId) {
@@ -17,7 +19,9 @@ var autoSkipper = function (tabId) {
     message.title = localStorage['title'];
 
     // 現在表示しているタブにメッセージを送る
-    chrome.tabs.sendMessage(tabId, message, function() {});
+    chrome.tabs.sendMessage(tabId, message, function() {
+        localStorage['title'] = '';
+    });
 }
 
 chrome.browserAction.onClicked.addListener(function(tab) {
@@ -35,10 +39,17 @@ chrome.extension.onConnect.addListener(function(port) {
 
 chrome.tabs.onCreated.addListener(function (tab) {
     
+    if (!localStorage['title']) {
+        return false;
+    }
+    
     var spTabId = tab.id;
     chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         if (spTabId == tabId && tab.status === 'complete') {
-            autoSkipper(tabId);
+            if (!localStorage['title']) {
+                return false;
+            }
+            autoSkipper(tab.id);
         }
     });
 });

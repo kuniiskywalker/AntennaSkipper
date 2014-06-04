@@ -36,7 +36,7 @@ var existsUrl = function (link) {
     // if (link.replace(/(https?)\:\/\/(.*)\/$/, "$2") == location.host + location.pathname) {
     //     return true;
     // }
-    if (link == location.href) {
+    if (link == location.origin + location.pathname) {
         return true;
     }
 
@@ -91,6 +91,13 @@ var clickFunction = function (e) {
     port.postMessage({title: title});
 };
 
+// aタグがクリックされた時の処理
+var clearHistory = function () {
+
+    var port = chrome.extension.connect({name: "AtoR"});
+    port.postMessage({title: ""});
+};
+
 var matchString = function (str, match) {
 
     if (str.match(new RegExp('^' + match))) {
@@ -115,6 +122,20 @@ var isChild = function (tag, text) {
          isChild(childs, text);
       }
     }
+};
+
+var getOrigin = function (url) {
+    var re = /https?:\/\/([^/]*)\//i;
+    var matches = url.match(re);
+
+    if (!matches) {
+        return '';
+    }
+    var origin = matches[0];
+    if (!origin.match(/(.+)\/$/)) {
+        return origin;
+    }
+    return origin[1];
 };
 
 // イベント登録処理
@@ -145,8 +166,6 @@ for (var i = 0; i < frameLen; i++) {
 
 var skipper = function (title) {
 
-    // console.log('title: ' + unescape(title));
-
     var anchors = document.getElementsByTagName('a');
     var len = anchors.length;
     for (var i = 0; i < len; i++) {
@@ -157,9 +176,9 @@ var skipper = function (title) {
         if (existsUrl(anchors[i].href)) {
             continue;
         } 
-        if (matchSkipAutoList(anchors[i].href)) {
-            continue;
-        }
+        // if (matchSkipAutoList(getOrigin(anchors[i].href))) {
+        //     continue;
+        // }
 
         var anchor_title = [];
         
@@ -188,11 +207,17 @@ var skipper = function (title) {
     return false;
 };
 
+<<<<<<< HEAD
 var goReality = function (btn) {
     var evt = document.createEvent("MouseEvents");
     evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
     btn.dispatchEvent( evt );
     // location.href = link;
+=======
+var goReality = function (link) {
+
+    location.href = link;
+>>>>>>> 66042c23b7d2b8f5122dbe4524e7002fcb2fd23a
     return true;
 };
 
@@ -249,6 +274,8 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
                 skipper(title)
             }
             
+            sendResponse();
+
             break;
 
         case('auto'):
@@ -265,7 +292,9 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
 
                 skipper(title)
             }
-            
+
+            sendResponse();
+
             break;
     }
 });
